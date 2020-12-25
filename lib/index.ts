@@ -1,42 +1,4 @@
-interface ProxyCollection<T> {
-  onChange?: (dataList: T[]) => any;
-  find?: (filter: Partial<T>, data: T[]) => any;
-  findOne?: (filter: Partial<T>, data?: T) => any;
-  deleteOne?: (filter: Partial<T>, data?: T) => any;
-  deleteMany?: (filter: Partial<T>, data: T[]) => any;
-  updateOne?: (
-    filter: Partial<T>,
-    inputData: Partial<T>,
-    returnData?: T
-  ) => any;
-  updateMany?: (
-    filter: Partial<T>,
-    inputData: Partial<T>,
-    returnData: T[]
-  ) => any;
-  insertOne?: (inputData: Partial<T>) => any;
-  insertMany?: (inputList: Partial<T>[]) => any;
-  removeDuplicatie?: (key: string, returnData: T[]) => any;
-}
-
-interface CollectionOptions<T> {
-  initData?: T;
-  sort?: { [key: string]: number };
-  proxy?: ProxyCollection<T>;
-}
-
-const sortFn = (sort: any, coll: any[]) => {
-  if (sort) {
-    const k = Object.keys(sort)[0];
-    const v = sort[k];
-    if (v === 1) {
-      coll = coll.sort((a: any, b: any) => a[k] - b[k]);
-    } else if (v === -1) {
-      coll = coll.sort((a: any, b: any) => b[k] - a[k]);
-    }
-  }
-  return coll;
-};
+import { collection, CollectionOptions } from "./collection";
 
 // 创建一个区别独立 key 前缀的 MicoDb
 export const createMicoDb = (name = "mico-db") => {
@@ -83,339 +45,6 @@ export const createMicoDb = (name = "mico-db") => {
     });
   }
 
-  async function initColl<T>(key: string): Promise<T[]> {
-    let coll = (await micoDb.get(key)) as any[];
-    if (!coll) {
-      coll = [];
-      micoDb.set(key, coll);
-    }
-    return coll;
-  }
-
-  const createItem = <T>(
-    type: "sessionStorage" | "localStorage",
-    key: string,
-    initData?: T
-  ) => {
-    const fns = {
-      set: void 0 as any,
-      get: void 0 as any,
-      remove: void 0 as any,
-    };
-    if (type === "sessionStorage") {
-      fns.set = micoDb.setSessionStorage;
-      fns.get = micoDb.getSessionStorage;
-      fns.remove = micoDb.removeSessionStorage;
-    } else {
-      fns.set = micoDb.setLocalStorage;
-      fns.get = micoDb.getLocalStorage;
-      fns.remove = micoDb.removeLocalStorage;
-    }
-    return {
-      get: (): T => {
-        let out = fns.get(key);
-        if (!out) {
-          out = initData;
-          fns.set(key, out);
-        }
-        return out;
-      },
-      set: (value: Partial<T>) => {
-        const old = fns.get(key);
-        fns.set(key, Object.assign(old, value));
-      },
-      remove: () => fns.remove(key),
-    };
-  };
-
-  const dbItem = <T>(key: string, initData: T) => {
-    return {
-      get: async (): Promise<T> => {
-        let out = (await micoDb.get(key)) as T;
-        if (out === void 0) {
-          out = initData;
-          await micoDb.set(key, out);
-        }
-        return out;
-      },
-      set: async (value: Partial<T>) => {
-        const old = await micoDb.set(key, value);
-        await micoDb.set(key, Object.assign(old, value));
-      },
-      remove: () => micoDb.remove(key),
-    };
-  };
-
-  const collection = <T>(key: string, opt: CollectionOptions<T> = {}) => {
-    if (!opt.proxy) {
-      opt.proxy = {};
-    }
-
-    return {
-      proxy: opt.proxy,
-      index: async (index: number, sort = opt.sort) => {
-        let coll = await initColl<T>(key);
-        coll = sortFn(sort, coll);
-        return coll[index];
-      },
-      count: async () => {
-        const coll = await initColl<T>(key);
-        return coll.length;
-      },
-      find: async (
-        filter?: Partial<T> | ((val: T) => any),
-        sort = opt.sort
-      ) => {
-        let coll = await initColl<T>(key);
-        coll = sortFn(sort, coll);
-
-        if (!filter) {
-          return coll;
-        }
-        const keys = Object.keys(filter!);
-        let out: T[];
-        if (typeof filter === "function") {
-          out = coll.filter(filter);
-        } else {
-          out = coll.filter((item: any) => {
-            let isPick = false;
-            for (let i = 0; i < keys.length; i++) {
-              const key = keys[i];
-              if ((filter as any)[key] === item[key]) {
-                isPick = true;
-                break;
-              }
-            }
-            return isPick;
-          });
-        }
-
-        if (opt.proxy!.find) {
-          await Promise.resolve(opt.proxy!.find(filter as any, out));
-        }
-        if (opt.proxy!.onChange) {
-          const all = await micoDb.get(key);
-          await Promise.resolve(opt.proxy!.onChange(all));
-        }
-        return out;
-      },
-      findOne: async (filter: Partial<T> | ((val: T) => any)) => {
-        const coll = await initColl<T>(key);
-        const keys = Object.keys(filter);
-        let out: T | undefined;
-        if (typeof filter === "function") {
-          out = coll.find(filter);
-        } else {
-          out = coll.find((item: any) => {
-            let isPick = false;
-            for (let i = 0; i < keys.length; i++) {
-              const key = keys[i];
-              if ((filter as any)[key] === item[key]) {
-                isPick = true;
-                break;
-              }
-            }
-            return isPick;
-          });
-        }
-        if (opt.proxy!.findOne) {
-          await Promise.resolve(opt.proxy!.findOne(filter as any, out));
-        }
-        if (opt.proxy!.onChange) {
-          const all = await micoDb.get(key);
-          await Promise.resolve(opt.proxy!.onChange(all));
-        }
-        return out;
-      },
-      deleteMany: async (filter: Partial<T>) => {
-        const coll = await initColl<T>(key);
-        const keys = Object.keys(filter);
-        const next = [] as T[];
-        const out = [] as T[];
-        coll.forEach((item: any) => {
-          let isPick = false;
-          for (let i = 0; i < keys.length; i++) {
-            const key = keys[i];
-            if ((filter as any)[key] === item[key]) {
-              isPick = true;
-              break;
-            }
-          }
-          if (!isPick) {
-            next.push(item);
-          } else {
-            out.push(item);
-          }
-        });
-        await micoDb.set(key, next);
-        if (opt.proxy!.deleteMany) {
-          await Promise.resolve(opt.proxy!.deleteMany(filter, out));
-        }
-        if (opt.proxy!.onChange) {
-          const all = await micoDb.get(key);
-          await Promise.resolve(opt.proxy!.onChange(all));
-        }
-        return out;
-      },
-      deleteOne: async (filter: Partial<T>): Promise<T | undefined> => {
-        const coll = await initColl<T>(key);
-        const keys = Object.keys(filter);
-        const next = [] as T[];
-        let del: T | undefined;
-        coll.forEach((item: any) => {
-          let isPick = false;
-          for (let i = 0; i < keys.length; i++) {
-            const key = keys[i];
-            if ((filter as any)[key] === item[key]) {
-              isPick = true;
-              break;
-            }
-          }
-          if (del) {
-            next.push(item);
-          } else if (!isPick) {
-            next.push(item);
-          } else {
-            del = item;
-          }
-        });
-        await micoDb.set(key, next);
-        if (opt.proxy!.deleteOne) {
-          await Promise.resolve(opt.proxy!.deleteOne(filter, del));
-        }
-        if (opt.proxy!.onChange) {
-          const all = await micoDb.get(key);
-          await Promise.resolve(opt.proxy!.onChange(all));
-        }
-        return del;
-      },
-      updateOne: async (
-        filter: Partial<T>,
-        data: Partial<T>
-      ): Promise<T | undefined> => {
-        const coll = await initColl<T>(key);
-        const keys = Object.keys(filter);
-        let out: T | undefined;
-        for (let index = 0; index < coll.length; index++) {
-          const item = coll[index] as any;
-          let isPick = false;
-          for (let i = 0; i < keys.length; i++) {
-            const key = keys[i];
-            if ((filter as any)[key] === item[key]) {
-              isPick = true;
-              break;
-            }
-          }
-          if (isPick) {
-            Object.assign(item, data);
-            out = item;
-            break;
-          }
-        }
-        await micoDb.set(key, coll);
-        if (opt.proxy!.updateOne) {
-          await Promise.resolve(opt.proxy!.updateOne(filter, data, out));
-        }
-        if (opt.proxy!.onChange) {
-          const all = await micoDb.get(key);
-          await Promise.resolve(opt.proxy!.onChange(all));
-        }
-        return out;
-      },
-      updateMany: async (
-        filter: Partial<T>,
-        data: Partial<T>
-      ): Promise<T[]> => {
-        const coll = await initColl<T>(key);
-        const keys = Object.keys(filter);
-        const out = [] as T[];
-        for (let index = 0; index < coll.length; index++) {
-          const item = coll[index] as any;
-          let isPick = false;
-          for (let i = 0; i < keys.length; i++) {
-            const key = keys[i];
-            if ((filter as any)[key] === item[key]) {
-              isPick = true;
-              break;
-            }
-          }
-          if (isPick) {
-            Object.assign(item, data);
-            out.push(item);
-          }
-        }
-        await micoDb.set(key, coll);
-        if (opt.proxy!.updateMany) {
-          await Promise.resolve(opt.proxy!.updateMany(filter, data, out));
-        }
-        if (opt.proxy!.onChange) {
-          const all = await micoDb.get(key);
-          await Promise.resolve(opt.proxy!.onChange(all));
-        }
-        return out;
-      },
-      insertOne: async (data: Partial<T>) => {
-        const coll = await initColl<T>(key);
-        coll.push(data as any);
-        await micoDb.set(key, coll);
-        if (opt.proxy!.insertOne) {
-          await Promise.resolve(opt.proxy!.insertOne(data));
-        }
-        if (opt.proxy!.onChange) {
-          const all = await micoDb.get(key);
-          await Promise.resolve(opt.proxy!.onChange(all));
-        }
-        return coll;
-      },
-      insertMany: async (dataList: Partial<T>[]) => {
-        const coll = await initColl<T>(key);
-        const next = coll.concat(dataList as any);
-        await micoDb.set(key, next);
-        if (opt.proxy!.insertMany) {
-          await Promise.resolve(opt.proxy!.insertMany(dataList));
-        }
-        if (opt.proxy!.onChange) {
-          const all = await micoDb.get(key);
-          await Promise.resolve(opt.proxy!.onChange(all));
-        }
-        return coll;
-      },
-      removeDuplicatie: async (key: string): Promise<T[]> => {
-        const coll = await initColl<T>(key);
-        const out = [] as T[];
-        const set = new Set();
-        for (let index = 0; index < coll.length; index++) {
-          const item = coll[index] as any;
-          const val = item[key];
-          if (val === void 0) {
-            out.push(item);
-            continue;
-          }
-          if (!set.has(val)) {
-            set.add(val);
-            out.push(item);
-          }
-        }
-        await micoDb.set(key, out);
-        if (opt.proxy!.removeDuplicatie) {
-          await Promise.resolve(opt.proxy!.removeDuplicatie(key, out));
-        }
-        if (opt.proxy && opt.proxy.onChange) {
-          const all = await micoDb.get(key);
-          await Promise.resolve(opt.proxy.onChange(all));
-        }
-        return out;
-      },
-      set: async (dataList: Partial<T>[]): Promise<void> => {
-        await micoDb.set(key, dataList);
-        if (opt.proxy!.onChange) {
-          const all = await micoDb.get(key);
-          await Promise.resolve(opt.proxy!.onChange(all));
-        }
-      },
-    };
-  };
-
   const micoDb = {
     name,
     isHaveIndexedDb: typeof window.indexedDB !== "undefined",
@@ -446,12 +75,29 @@ export const createMicoDb = (name = "mico-db") => {
         });
       });
     },
-    collection,
-    dbItem,
-    sessionItem: <T>(key: string, initData?: T) =>
-      createItem("sessionStorage", key, initData),
-    localItem: <T>(key: string, initData?: T) =>
-      createItem("localStorage", key, initData),
+    collection: <T>(key: string, opt: Partial<CollectionOptions<T>> = {}) => {
+      const type = opt.type || "indexedDB";
+      return collection(key, {
+        ...opt,
+        get:
+          type === "indexedDB"
+            ? micoDb.get
+            : type === "sessionStorage"
+            ? micoDb.getSessionStorage
+            : micoDb.getLocalStorage,
+        set:
+          type === "indexedDB"
+            ? micoDb.set
+            : type === "sessionStorage"
+            ? micoDb.setSessionStorage
+            : micoDb.setLocalStorage,
+      });
+    },
+    // dbItem,
+    // sessionItem: <T>(key: string, initData?: T) =>
+    //   createItem("sessionStorage", key, initData),
+    // localItem: <T>(key: string, initData?: T) =>
+    //   createItem("localStorage", key, initData),
     /** get indexedDb by key */
     get: (key: string): Promise<any> => {
       return new Promise((res) => {
@@ -528,4 +174,6 @@ export const createMicoDb = (name = "mico-db") => {
   return micoDb;
 };
 
-export default createMicoDb();
+const micoDb = createMicoDb();
+
+export default micoDb;
