@@ -1,6 +1,6 @@
 {
   "name": "mico-db",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "main": "umd/index.js",
   "types": "umd/index.d.ts",
   "description": "简易的 Web indexedDB 接口封装, 兼容 localStoage 和 sessionStorage",
@@ -16,6 +16,7 @@
     "@babel/preset-env": "^7.12.10",
     "@babel/preset-typescript": "^7.12.7",
     "@types/jest": "^26.0.19",
+    "error-get": "^1.0.1",
     "eslint-plugin-jest": "^24.1.3",
     "jest": "^26.6.3",
     "jest-stare": "^2.2.0",
@@ -23,8 +24,7 @@
     "rollup-plugin-typescript2": "^0.24.3",
     "rollup-plugin-uglify": "^6.0.3",
     "typedoc": "^0.19.2",
-    "error-get": "^1.0.1",
-    "typescript": "3.9.6"
+    "typescript": "^4.1.3"
   },
   "repository": {
     "type": "git",
@@ -34,7 +34,5 @@
     "url": "git+https://github.com/ymzuiku/mico-db.git"
   },
   "homepage": "git+https://github.com/ymzuiku/mico-db.git",
-  "dependencies": {
-    
-  }
+  "dependencies": {}
 }
