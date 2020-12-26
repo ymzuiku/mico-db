@@ -338,7 +338,7 @@ export const collection = <T extends BaseColl>(
     insertOne: async (data: Partial<T>) => {
       const coll = await initColl<T>(key);
       if (!data._id) {
-        data._id = "_id" + Date.now + Math.random();
+        data._id = "_id" + Date.now() + Math.random();
       }
       coll.push(data as any);
       await _set(key, coll);
