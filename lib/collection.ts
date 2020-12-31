@@ -1,6 +1,9 @@
+import { nanoid } from "nanoid";
+
 export interface BaseColl {
   _id?: string;
 }
+
 export interface ProxyCollection<T extends BaseColl> {
   onChange?: (dataList: T[]) => any;
   find?: (filter: Partial<T>, data: T[]) => any;
@@ -338,7 +341,7 @@ export const collection = <T extends BaseColl>(
     insertOne: async (data: Partial<T>) => {
       const coll = await initColl<T>(key);
       if (!data._id) {
-        data._id = "_id" + Date.now() + Math.random();
+        data._id = nanoid();
       }
       coll.push(data as any);
       await _set(key, coll);
@@ -353,10 +356,9 @@ export const collection = <T extends BaseColl>(
     },
     insertMany: async (dataList: Partial<T>[]) => {
       const coll = await initColl<T>(key);
-      const len = coll.length;
-      dataList.forEach((v, i) => {
+      dataList.forEach((v) => {
         if (!v._id) {
-          v._id = "_id" + Date.now + Math.random();
+          v._id = nanoid();
         }
         coll.push(v as any);
       });
