@@ -94,18 +94,18 @@ export const createMicoDb = (name = "mico-db") => {
             : micoDb.setLocalStorage,
       });
     },
-    localItem: <T>(init: T) => {
-      return CreateItem({
+    localItem: <T>(key: string, init: T) => {
+      return CreateItem<T>(key, {
+        init,
         type: "localStorage",
-        init: init || ({} as any),
         set: micoDb.setLocalStorage,
         get: micoDb.getSessionStorage,
       });
     },
-    sessionItem: <T>(init: T) => {
-      return CreateItem({
+    sessionItem: <T>(key: string, init: T) => {
+      return CreateItem(key, {
+        init,
         type: "sessionStorage",
-        init: init || ({} as any),
         set: micoDb.setSessionStorage,
         get: micoDb.getSessionStorage,
       });

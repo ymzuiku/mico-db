@@ -1,25 +1,25 @@
 export interface Item<T> {
-  merge: (key: string, value: any) => void;
-  set: (key: string, value: any) => void;
-  get: (key: string) => T;
+  merge: (value: any) => void;
+  set: (value: any) => void;
+  get: () => T;
 }
 
 export interface ItemOptions<T> {
-  init?: (data: T) => any;
+  init?: T;
   type?: "sessionStorage" | "localStorage";
   set: (key: string, value: any) => void;
   get: (key: string) => T;
 }
 
-export const CreateItem = <T>(opt: ItemOptions<T>): Item<T> => {
+export const CreateItem = <T>(key: string, opt: ItemOptions<T>): Item<T> => {
   const out = {
-    get: (key: string): T => {
+    get: (): T => {
       return opt.get(key);
     },
-    set: (key: string, data: Partial<T>) => {
+    set: (data: Partial<T>) => {
       opt.set(key, data);
     },
-    merge: (key: string, data: Partial<T>) => {
+    merge: (data: Partial<T>) => {
       const old = opt.get(key);
       const next = { ...old, ...data };
       opt.set(key, next);
