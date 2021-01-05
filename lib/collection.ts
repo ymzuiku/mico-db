@@ -27,7 +27,7 @@ export interface ProxyCollection<T extends BaseColl> {
 
 export interface CollectionOptions<T extends BaseColl> {
   type?: "sessionStorage" | "indexedDB" | "localStorage";
-  firstItem?: T;
+  init?: T;
   sort?: { [key: string]: number };
   proxy?: ProxyCollection<T>;
   set: (key: string, value: any) => void | Promise<void>;
@@ -86,8 +86,8 @@ export const collection = <T extends BaseColl>(
     proxy: opt.proxy,
     index: async (index: number, sort = opt.sort) => {
       let coll = await initColl<T>(key);
-      if (opt.firstItem && coll.length === 0) {
-        await db.insertOne(opt.firstItem);
+      if (opt.init && coll.length === 0) {
+        await db.insertOne(opt.init);
       }
       coll = sortFn(sort, coll);
       return coll[index];
@@ -102,8 +102,8 @@ export const collection = <T extends BaseColl>(
     ): Promise<T[]> => {
       let coll = await initColl<T>(key);
 
-      if (opt.firstItem && coll.length === 0) {
-        await db.insertOne(opt.firstItem);
+      if (opt.init && coll.length === 0) {
+        await db.insertOne(opt.init);
       }
 
       coll = sortFn(sort, coll);
@@ -140,8 +140,8 @@ export const collection = <T extends BaseColl>(
     },
     findOne: async (filter?: Partial<T> | ((val: T) => any)): Promise<T> => {
       const coll = await initColl<T>(key);
-      if (opt.firstItem && coll.length === 0) {
-        await db.insertOne(opt.firstItem);
+      if (opt.init && coll.length === 0) {
+        await db.insertOne(opt.init);
       }
       const keys = Object.keys(filter || {});
       if (keys.length === 0) {

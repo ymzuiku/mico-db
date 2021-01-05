@@ -35,7 +35,7 @@ export declare const createMicoDb: (
             [key: string]: number;
           }
         | undefined
-    ) => Promise<T[]> /** remove indexedDb by key */;
+    ) => Promise<T[]>;
     findOne: (
       filter?: Partial<T> | ((val: T) => any) | undefined
     ) => Promise<T>;
@@ -92,7 +92,7 @@ declare const micoDb: {
             [key: string]: number;
           }
         | undefined
-    ) => Promise<T[]> /** remove indexedDb by key */;
+    ) => Promise<T[]>;
     findOne: (
       filter?: Partial<T> | ((val: T) => any) | undefined
     ) => Promise<T>;

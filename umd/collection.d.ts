@@ -15,7 +15,7 @@ export interface ProxyCollection<T extends BaseColl> {
 }
 export interface CollectionOptions<T extends BaseColl> {
     type?: "sessionStorage" | "indexedDB" | "localStorage";
-    firstItem?: T;
+    init?: T;
     sort?: {
         [key: string]: number;
     };
