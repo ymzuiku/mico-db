@@ -1,4 +1,5 @@
 import { collection, CollectionOptions } from "./collection";
+import { CreateItem } from "./item";
 
 // 创建一个区别独立 key 前缀的 MicoDb
 export const createMicoDb = (name = "mico-db") => {
@@ -93,12 +94,22 @@ export const createMicoDb = (name = "mico-db") => {
             : micoDb.setLocalStorage,
       });
     },
-    // dbItem,
-    // sessionItem: <T>(key: string, initData?: T) =>
-    //   createItem("sessionStorage", key, initData),
-    // localItem: <T>(key: string, initData?: T) =>
-    //   createItem("localStorage", key, initData),
-    /** get indexedDb by key */
+    localItem: <T>(init: T) => {
+      return CreateItem({
+        type: "localStorage",
+        init: init || ({} as any),
+        set: micoDb.setLocalStorage,
+        get: micoDb.getSessionStorage,
+      });
+    },
+    sessionItem: <T>(init: T) => {
+      return CreateItem({
+        type: "sessionStorage",
+        init: init || ({} as any),
+        set: micoDb.setSessionStorage,
+        get: micoDb.getSessionStorage,
+      });
+    },
     get: (key: string): Promise<any> => {
       return new Promise((res) => {
         if (!key) {
