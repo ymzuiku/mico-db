@@ -1,6 +1,6 @@
 export interface Item<T> {
-    merge: (value: any) => void;
-    set: (value: any) => void;
+    merge: (value: Partial<T>) => void;
+    set: (value: Partial<T>) => void;
     get: () => T;
 }
 export interface ItemOptions<T> {
