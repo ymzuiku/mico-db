@@ -1,6 +1,6 @@
 {
   "name": "mico-db",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "main": "umd/index.js",
   "types": "umd/index.d.ts",
   "description": "简易的 Web indexedDB 接口封装, 兼容 localStoage 和 sessionStorage",
@@ -33,8 +33,5 @@
   "bugs": {
     "url": "git+https://github.com/ymzuiku/mico-db.git"
   },
-  "homepage": "git+https://github.com/ymzuiku/mico-db.git",
-  "dependencies": {
-    "nanoid": "^3.1.20"
-  }
+  "homepage": "git+https://github.com/ymzuiku/mico-db.git"
 }

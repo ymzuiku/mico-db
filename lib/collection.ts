@@ -1,4 +1,6 @@
-import { nanoid } from "nanoid";
+const getId = () => {
+  return "u" + Date.now() + Math.random();
+};
 
 export interface BaseColl {
   _id?: string;
@@ -341,7 +343,7 @@ export const collection = <T extends BaseColl>(
     insertOne: async (data: Partial<T>) => {
       const coll = await initColl<T>(key);
       if (!data._id) {
-        data._id = nanoid();
+        data._id = getId();
       }
       coll.push(data as any);
       await _set(key, coll);
@@ -358,7 +360,7 @@ export const collection = <T extends BaseColl>(
       const coll = await initColl<T>(key);
       dataList.forEach((v) => {
         if (!v._id) {
-          v._id = nanoid();
+          v._id = getId();
         }
         coll.push(v as any);
       });
