@@ -2,6 +2,8 @@
 
 简易的 Web indexedDB 接口封装, 兼容 localStoage 和 sessionStorage, 内置 mini-mongodb API
 
+[Document](mico-db.writeflowy.com)
+
 ## API
 
 ```ts
