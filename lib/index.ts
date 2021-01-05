@@ -103,7 +103,7 @@ export const createMicoDb = (name = "mico-db") => {
       });
     },
     sessionItem: <T>(key: string, init: T) => {
-      return CreateItem(key, {
+      return CreateItem<T>(key, {
         init,
         type: "sessionStorage",
         set: micoDb.setSessionStorage,

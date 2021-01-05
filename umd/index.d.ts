@@ -25,7 +25,7 @@ export declare const createMicoDb: (name?: string) => {
         set: (dataList: Partial<T>[]) => Promise<void>;
     };
     localItem: <T_1>(key: string, init: T_1) => import("./item").Item<T_1>;
-    sessionItem: <T_2>(key: string, init: T_2) => import("./item").Item<any>;
+    sessionItem: <T_2>(key: string, init: T_2) => import("./item").Item<T_2>;
     get: (key: string) => Promise<any>;
     /** set indexedDb by key */
     set: (key: string, obj: any) => Promise<any>;
@@ -62,7 +62,7 @@ declare const micoDb: {
         set: (dataList: Partial<T>[]) => Promise<void>;
     };
     localItem: <T_1>(key: string, init: T_1) => import("./item").Item<T_1>;
-    sessionItem: <T_2>(key: string, init: T_2) => import("./item").Item<any>;
+    sessionItem: <T_2>(key: string, init: T_2) => import("./item").Item<T_2>;
     get: (key: string) => Promise<any>;
     /** set indexedDb by key */
     set: (key: string, obj: any) => Promise<any>;
