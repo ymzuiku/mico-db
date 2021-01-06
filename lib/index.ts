@@ -99,7 +99,7 @@ export const createMicoDb = (name = "mico-db") => {
         init,
         type: "localStorage",
         set: micoDb.setLocalStorage,
-        get: micoDb.getSessionStorage,
+        get: micoDb.getLocalStorage,
       });
     },
     sessionItem: <T>(key: string, init: T) => {

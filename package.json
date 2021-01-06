@@ -1,6 +1,6 @@
 {
   "name": "mico-db",
-  "version": "1.4.8",
+  "version": "1.4.9",
   "main": "umd/index.js",
   "types": "umd/index.d.ts",
   "description": "简易的 Web indexedDB 接口封装, 兼容 localStoage 和 sessionStorage",

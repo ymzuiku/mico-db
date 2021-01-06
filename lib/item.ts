@@ -13,28 +13,32 @@ export interface ItemOptions<T> {
 }
 
 export const CreateItem = <T>(key: string, opt: ItemOptions<T>): Item<T> => {
-  const out = (data?: Partial<T>) => {
+  const item = (data?: Partial<T>): T => {
     if (data) {
-      out.merge(data);
-      return out.get();
+      const old = opt.get(key);
+      Object.assign(old, data);
+      opt.set(key, old);
+      return old;
     }
-    return out.get();
+    return opt.get(key);
   };
-  out.get = function (): T {
+  item.get = function (): T {
     let out = opt.get(key);
     if (!out) {
       out = opt.init as any;
-      opt.set(key, opt);
+      opt.set(key, out);
     }
     return out;
   } as Item<T>;
-  out.set = (data: Partial<T>) => {
+  item.set = (data: Partial<T>): T => {
     opt.set(key, data);
+    return data as T;
   };
-  out.merge = (data: Partial<T>) => {
+  item.merge = (data: Partial<T>): T => {
     const old = opt.get(key);
-    const next = { ...old, ...data };
-    opt.set(key, next);
+    Object.assign(old, data);
+    opt.set(key, old);
+    return old;
   };
-  return out;
+  return item;
 };
