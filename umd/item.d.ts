@@ -1,4 +1,5 @@
 export interface Item<T> {
+    (data?: Partial<T>): T;
     merge: (value: Partial<T>) => void;
     set: (value: Partial<T>) => void;
     get: () => T;

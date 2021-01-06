@@ -56,7 +56,8 @@ export declare const createMicoDb: (
     removeDuplicatie: (key: string) => Promise<T[]>;
     set: (dataList: Partial<T>[]) => Promise<void>;
   };
-  /** get indexedDb by key */
+  localItem: <T_1>(key: string, init: T_1) => import("./item").Item<T_1>;
+  sessionItem: <T_2>(key: string, init: T_2) => import("./item").Item<T_2>;
   get: (key: string) => Promise<any>;
   /** set indexedDb by key */
   set: (key: string, obj: any) => Promise<any>;
@@ -113,7 +114,8 @@ declare const micoDb: {
     removeDuplicatie: (key: string) => Promise<T[]>;
     set: (dataList: Partial<T>[]) => Promise<void>;
   };
-  /** get indexedDb by key */
+  localItem: <T_1>(key: string, init: T_1) => import("./item").Item<T_1>;
+  sessionItem: <T_2>(key: string, init: T_2) => import("./item").Item<T_2>;
   get: (key: string) => Promise<any>;
   /** set indexedDb by key */
   set: (key: string, obj: any) => Promise<any>;
