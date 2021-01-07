@@ -15,12 +15,12 @@ export interface ItemOptions<T> {
 export const CreateItem = <T>(key: string, opt: ItemOptions<T>): Item<T> => {
   const item = (data?: Partial<T>): T => {
     if (data) {
-      const old = opt.get(key);
+      const old = item.get();
       Object.assign(old, data);
-      opt.set(key, old);
+      item.set(old);
       return old;
     }
-    return opt.get(key);
+    return item.get();
   };
   item.get = function (): T {
     let out = opt.get(key);
