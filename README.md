@@ -2,7 +2,7 @@
 
 简易的 Web indexedDB 接口封装, 兼容 localStoage 和 sessionStorage, 内置 mini-mongodb API
 
-[Document Webside](http://mico-db.writeflowy.com)
+Document: [https://www.writeflowy.com/mico-db](https://www.writeflowy.com/mico-db)
 
 ## API
 
