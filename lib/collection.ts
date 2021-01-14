@@ -134,10 +134,10 @@ export const collection = <T extends BaseColl>(
       if (opt.proxy!.find) {
         await Promise.resolve(opt.proxy!.find(filter as any, out));
       }
-      if (opt.proxy!.onChange) {
-        const all = await _get(key);
-        await Promise.resolve(opt.proxy!.onChange(all));
-      }
+      // if (opt.proxy!.onChange) {
+      //   const all = await _get(key);
+      //   await Promise.resolve(opt.proxy!.onChange(all));
+      // }
       return out;
     },
     findOne: async (filter?: Partial<T> | ((val: T) => any)): Promise<T> => {
@@ -170,10 +170,10 @@ export const collection = <T extends BaseColl>(
           opt.proxy!.findOne(filter as any, (out || {}) as any)
         );
       }
-      if (opt.proxy!.onChange) {
-        const all = await _get(key);
-        await Promise.resolve(opt.proxy!.onChange(all));
-      }
+      // if (opt.proxy!.onChange) {
+      //   const all = await _get(key);
+      //   await Promise.resolve(opt.proxy!.onChange(all));
+      // }
       return (out || {}) as any;
     },
     deleteMany: async (filter?: Partial<T>): Promise<T[]> => {
