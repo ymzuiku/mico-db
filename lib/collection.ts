@@ -36,6 +36,18 @@ export interface CollectionOptions<T extends BaseColl> {
   get: (key: string) => T[] | Promise<T[]>;
 }
 
+function onChangeCb(opt: any, _get: any, key: string) {
+  if (opt.proxy!.onChange) {
+    _get(key).then((all: any) => {
+      const next = JSON.stringify(all);
+      if (opt.lastOnChange !== next) {
+        opt.proxy!.onChange(all);
+      }
+      opt.lastOnChange = next;
+    });
+  }
+}
+
 const sortFn = (sort: any, coll: any[]) => {
   if (sort) {
     const k = Object.keys(sort)[0];
@@ -58,6 +70,7 @@ export const collection = <T extends BaseColl>(
   if (!opt.proxy) {
     opt.proxy = {};
   }
+  let old = [] as any;
   const _get = async (key: string) => {
     if (caches[key]) {
       return caches[key];
@@ -134,10 +147,6 @@ export const collection = <T extends BaseColl>(
       if (opt.proxy!.find) {
         await Promise.resolve(opt.proxy!.find(filter as any, out));
       }
-      // if (opt.proxy!.onChange) {
-      //   const all = await _get(key);
-      //   await Promise.resolve(opt.proxy!.onChange(all));
-      // }
       return out;
     },
     findOne: async (filter?: Partial<T> | ((val: T) => any)): Promise<T> => {
@@ -170,10 +179,6 @@ export const collection = <T extends BaseColl>(
           opt.proxy!.findOne(filter as any, (out || {}) as any)
         );
       }
-      // if (opt.proxy!.onChange) {
-      //   const all = await _get(key);
-      //   await Promise.resolve(opt.proxy!.onChange(all));
-      // }
       return (out || {}) as any;
     },
     deleteMany: async (filter?: Partial<T>): Promise<T[]> => {
@@ -214,10 +219,7 @@ export const collection = <T extends BaseColl>(
       if (opt.proxy!.deleteMany) {
         await Promise.resolve(opt.proxy!.deleteMany(filter, out));
       }
-      if (opt.proxy!.onChange) {
-        const all = await _get(key);
-        await Promise.resolve(opt.proxy!.onChange(all));
-      }
+      onChangeCb(opt, _get, key);
       return out;
     },
     deleteOne: async (filter?: Partial<T>): Promise<T | undefined> => {
@@ -232,10 +234,7 @@ export const collection = <T extends BaseColl>(
         if (opt.proxy!.deleteOne) {
           await Promise.resolve(opt.proxy!.deleteOne(filter!, del));
         }
-        if (opt.proxy!.onChange) {
-          const all = await _get(key);
-          await Promise.resolve(opt.proxy!.onChange(all));
-        }
+        onChangeCb(opt, _get, key);
         return del;
       }
       const next = [] as T[];
@@ -261,10 +260,7 @@ export const collection = <T extends BaseColl>(
       if (opt.proxy!.deleteOne) {
         await Promise.resolve(opt.proxy!.deleteOne(filter, del));
       }
-      if (opt.proxy!.onChange) {
-        const all = await _get(key);
-        await Promise.resolve(opt.proxy!.onChange(all));
-      }
+      onChangeCb(opt, _get, key);
       return del;
     },
     updateOne: async (
@@ -300,10 +296,7 @@ export const collection = <T extends BaseColl>(
       if (opt.proxy!.updateOne) {
         await Promise.resolve(opt.proxy!.updateOne(filter, data, out));
       }
-      if (opt.proxy!.onChange) {
-        const all = await _get(key);
-        await Promise.resolve(opt.proxy!.onChange(all));
-      }
+      onChangeCb(opt, _get, key);
       return out;
     },
     updateMany: async (
@@ -334,10 +327,7 @@ export const collection = <T extends BaseColl>(
       if (opt.proxy!.updateMany) {
         await Promise.resolve(opt.proxy!.updateMany(filter, data, out));
       }
-      if (opt.proxy!.onChange) {
-        const all = await _get(key);
-        await Promise.resolve(opt.proxy!.onChange(all));
-      }
+      onChangeCb(opt, _get, key);
       return out;
     },
     insertOne: async (data: Partial<T>) => {
@@ -350,10 +340,7 @@ export const collection = <T extends BaseColl>(
       if (opt.proxy!.insertOne) {
         await Promise.resolve(opt.proxy!.insertOne(data));
       }
-      if (opt.proxy!.onChange) {
-        const all = await _get(key);
-        await Promise.resolve(opt.proxy!.onChange(all));
-      }
+      onChangeCb(opt, _get, key);
       return coll;
     },
     insertMany: async (dataList: Partial<T>[]) => {
@@ -368,10 +355,7 @@ export const collection = <T extends BaseColl>(
       if (opt.proxy!.insertMany) {
         await Promise.resolve(opt.proxy!.insertMany(dataList));
       }
-      if (opt.proxy!.onChange) {
-        const all = await _get(key);
-        await Promise.resolve(opt.proxy!.onChange(all));
-      }
+      onChangeCb(opt, _get, key);
       return coll;
     },
     removeDuplicatie: async (key: string): Promise<T[]> => {
@@ -394,18 +378,12 @@ export const collection = <T extends BaseColl>(
       if (opt.proxy!.removeDuplicatie) {
         await Promise.resolve(opt.proxy!.removeDuplicatie(key, out));
       }
-      if (opt.proxy && opt.proxy.onChange) {
-        const all = await _get(key);
-        await Promise.resolve(opt.proxy.onChange(all));
-      }
+      onChangeCb(opt, _get, key);
       return out;
     },
     set: async (dataList: Partial<T>[]): Promise<void> => {
       await _set(key, dataList);
-      if (opt.proxy!.onChange) {
-        const all = await _get(key);
-        await Promise.resolve(opt.proxy!.onChange(all));
-      }
+      onChangeCb(opt, _get, key);
     },
   };
   return db;
