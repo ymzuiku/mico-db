@@ -7,8 +7,14 @@ export interface ProxyCollection<T extends BaseColl> {
     findOne?: (filter: Partial<T>, data?: T) => any;
     deleteOne?: (filter: Partial<T>, data?: T) => any;
     deleteMany?: (filter: Partial<T>, data: T[]) => any;
-    updateOne?: (filter: Partial<T>, inputData: Partial<T>, returnData?: T) => any;
-    updateMany?: (filter: Partial<T>, inputData: Partial<T>, returnData: T[]) => any;
+    updateOne?: (filter: Partial<T>, inputData: {
+        $set?: Partial<T>;
+        $unset?: Partial<T>;
+    }, returnData?: T) => any;
+    updateMany?: (filter: Partial<T>, inputData: {
+        $set?: Partial<T>;
+        $unset?: Partial<T>;
+    }, returnData: T[]) => any;
     insertOne?: (inputData: Partial<T>) => any;
     insertMany?: (inputList: Partial<T>[]) => any;
     removeDuplicatie?: (key: string, returnData: T[]) => any;
@@ -23,6 +29,9 @@ export interface CollectionOptions<T extends BaseColl> {
     set: (key: string, value: any) => void | Promise<void>;
     get: (key: string) => T[] | Promise<T[]>;
 }
+export interface CollectionUpdateOpt<T> {
+    $set?: Partial<T & BaseColl>;
+}
 export declare const collection: <T extends BaseColl>(key: string, opt: CollectionOptions<T>) => {
     proxy: ProxyCollection<T>;
     index: (index: number, sort?: {
@@ -35,8 +44,8 @@ export declare const collection: <T extends BaseColl>(key: string, opt: Collecti
     findOne: (filter?: Partial<T> | ((val: T) => any) | undefined) => Promise<T>;
     deleteMany: (filter?: Partial<T> | undefined) => Promise<T[]>;
     deleteOne: (filter?: Partial<T> | undefined) => Promise<T | undefined>;
-    updateOne: (filter: Partial<T & BaseColl>, data: Partial<T & BaseColl>) => Promise<(T & BaseColl) | undefined>;
-    updateMany: (filter: Partial<T & BaseColl>, data: Partial<T & BaseColl>) => Promise<T[]>;
+    updateOne: (filter: Partial<T & BaseColl>, { $set }: CollectionUpdateOpt<T>) => Promise<(T & BaseColl) | undefined>;
+    updateMany: (filter: Partial<T & BaseColl>, { $set }: CollectionUpdateOpt<T>) => Promise<T[]>;
     insertOne: (data: Partial<T>) => Promise<T[]>;
     insertMany: (dataList: Partial<T>[]) => Promise<T[]>;
     removeDuplicatie: (key: string) => Promise<T[]>;

@@ -1,4 +1,4 @@
-import { CollectionOptions } from "./collection";
+import { CollectionOptions, CollectionUpdateOpt } from "./collection";
 export declare const createMicoDb: (name?: string) => {
     name: string;
     isHaveIndexedDb: boolean;
@@ -17,8 +17,8 @@ export declare const createMicoDb: (name?: string) => {
         findOne: (filter?: Partial<T> | ((val: T) => any) | undefined) => Promise<T>;
         deleteMany: (filter?: Partial<T> | undefined) => Promise<T[]>;
         deleteOne: (filter?: Partial<T> | undefined) => Promise<T | undefined>;
-        updateOne: (filter: Partial<T & import("./collection").BaseColl>, data: Partial<T & import("./collection").BaseColl>) => Promise<(T & import("./collection").BaseColl) | undefined>;
-        updateMany: (filter: Partial<T & import("./collection").BaseColl>, data: Partial<T & import("./collection").BaseColl>) => Promise<T[]>;
+        updateOne: (filter: Partial<T & import("./collection").BaseColl>, { $set }: CollectionUpdateOpt<T>) => Promise<(T & import("./collection").BaseColl) | undefined>;
+        updateMany: (filter: Partial<T & import("./collection").BaseColl>, { $set }: CollectionUpdateOpt<T>) => Promise<T[]>;
         insertOne: (data: Partial<T>) => Promise<T[]>;
         insertMany: (dataList: Partial<T>[]) => Promise<T[]>;
         removeDuplicatie: (key: string) => Promise<T[]>;
@@ -54,8 +54,8 @@ declare const micoDb: {
         findOne: (filter?: Partial<T> | ((val: T) => any) | undefined) => Promise<T>;
         deleteMany: (filter?: Partial<T> | undefined) => Promise<T[]>;
         deleteOne: (filter?: Partial<T> | undefined) => Promise<T | undefined>;
-        updateOne: (filter: Partial<T & import("./collection").BaseColl>, data: Partial<T & import("./collection").BaseColl>) => Promise<(T & import("./collection").BaseColl) | undefined>;
-        updateMany: (filter: Partial<T & import("./collection").BaseColl>, data: Partial<T & import("./collection").BaseColl>) => Promise<T[]>;
+        updateOne: (filter: Partial<T & import("./collection").BaseColl>, { $set }: CollectionUpdateOpt<T>) => Promise<(T & import("./collection").BaseColl) | undefined>;
+        updateMany: (filter: Partial<T & import("./collection").BaseColl>, { $set }: CollectionUpdateOpt<T>) => Promise<T[]>;
         insertOne: (data: Partial<T>) => Promise<T[]>;
         insertMany: (dataList: Partial<T>[]) => Promise<T[]>;
         removeDuplicatie: (key: string) => Promise<T[]>;

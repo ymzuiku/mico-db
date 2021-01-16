@@ -1,4 +1,8 @@
-import { collection, CollectionOptions } from "./collection";
+import {
+  collection,
+  CollectionOptions,
+  CollectionUpdateOpt,
+} from "./collection";
 import { CreateItem } from "./item";
 
 // 创建一个区别独立 key 前缀的 MicoDb

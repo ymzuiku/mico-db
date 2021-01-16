@@ -14,12 +14,12 @@ export interface ProxyCollection<T extends BaseColl> {
   deleteMany?: (filter: Partial<T>, data: T[]) => any;
   updateOne?: (
     filter: Partial<T>,
-    inputData: Partial<T>,
+    inputData: { $set?: Partial<T>; $unset?: Partial<T> },
     returnData?: T
   ) => any;
   updateMany?: (
     filter: Partial<T>,
-    inputData: Partial<T>,
+    inputData: { $set?: Partial<T>; $unset?: Partial<T> },
     returnData: T[]
   ) => any;
   insertOne?: (inputData: Partial<T>) => any;
@@ -62,6 +62,46 @@ const sortFn = (sort: any, coll: any[]) => {
 };
 
 const caches = {} as { [key: string]: any };
+
+export interface CollectionUpdateOpt<T> {
+  $set?: Partial<T & BaseColl>;
+}
+
+// interface CollectionObj<T> {
+//   proxy: ProxyCollection<T>;
+//   index: (
+//     index: number,
+//     sort?:
+//       | {
+//           [key: string]: number;
+//         }
+//       | undefined
+//   ) => Promise<T>;
+//   count: () => Promise<number>;
+//   find: (
+//     filter?: Partial<T> | ((val: T) => any) | undefined,
+//     sort?:
+//       | {
+//           [key: string]: number;
+//         }
+//       | undefined
+//   ) => Promise<T[]>;
+//   findOne: (filter?: Partial<T> | ((val: T) => any) | undefined) => Promise<T>;
+//   deleteMany: (filter?: Partial<T> | undefined) => Promise<T[]>;
+//   deleteOne: (filter?: Partial<T> | undefined) => Promise<T | undefined>;
+//   updateOne: (
+//     filter: Partial<T & BaseColl>,
+//     data: CollectionUpdateOpt<T>
+//   ) => Promise<(T & BaseColl) | undefined>;
+//   updateMany: (
+//     filter: Partial<T & BaseColl>,
+//     data: CollectionUpdateOpt<T>
+//   ) => Promise<T[]>;
+//   insertOne: (data: Partial<T>) => Promise<T[]>;
+//   insertMany: (dataList: Partial<T>[]) => Promise<T[]>;
+//   removeDuplicatie: (key: string) => Promise<T[]>;
+//   set: (dataList: Partial<T>[]) => Promise<void>;
+// }
 
 export const collection = <T extends BaseColl>(
   key: string,
@@ -265,14 +305,16 @@ export const collection = <T extends BaseColl>(
     },
     updateOne: async (
       filter: Partial<T & BaseColl>,
-      data: Partial<T & BaseColl>
+      { $set }: CollectionUpdateOpt<T>
     ): Promise<(T & BaseColl) | undefined> => {
       const coll = await initColl<T>(key);
       const keys = Object.keys(filter);
 
       let out: T | undefined;
       if (keys.length === 0) {
-        coll[0] = Object.assign(coll[0] || {}, data);
+        if ($set) {
+          coll[0] = Object.assign(coll[0] || {}, $set);
+        }
       } else {
         for (let index = 0; index < coll.length; index++) {
           const item = (coll[index] as any) || {};
@@ -285,7 +327,7 @@ export const collection = <T extends BaseColl>(
             }
           }
           if (isPick) {
-            Object.assign(item, data);
+            Object.assign(item, $set);
             out = item;
             break;
           }
@@ -294,14 +336,14 @@ export const collection = <T extends BaseColl>(
 
       await _set(key, coll);
       if (opt.proxy!.updateOne) {
-        await Promise.resolve(opt.proxy!.updateOne(filter, data, out));
+        await Promise.resolve(opt.proxy!.updateOne(filter, { $set }, out));
       }
       onChangeCb(opt, _get, key);
       return out;
     },
     updateMany: async (
       filter: Partial<T & BaseColl>,
-      data: Partial<T & BaseColl>
+      { $set }: CollectionUpdateOpt<T>
     ): Promise<T[]> => {
       const coll = await initColl<T>(key);
       const keys = Object.keys(filter);
@@ -319,13 +361,13 @@ export const collection = <T extends BaseColl>(
           }
         }
         if (isPick) {
-          Object.assign(item, data);
+          Object.assign(item, $set);
           out.push(item);
         }
       }
       await _set(key, coll);
       if (opt.proxy!.updateMany) {
-        await Promise.resolve(opt.proxy!.updateMany(filter, data, out));
+        await Promise.resolve(opt.proxy!.updateMany(filter, { $set }, out));
       }
       onChangeCb(opt, _get, key);
       return out;
@@ -386,5 +428,6 @@ export const collection = <T extends BaseColl>(
       onChangeCb(opt, _get, key);
     },
   };
+
   return db;
 };
